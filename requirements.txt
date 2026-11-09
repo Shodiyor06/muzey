@@ -3,3 +3,10 @@ Pillow
 whitenoise
 gunicorn
 python-dotenv
+Django>=5.2,<5.3
+Pillow
+whitenoise
+gunicorn
+python-dotenv
+dj-database-url
+psycopg2-binary
