@@ -1,0 +1,179 @@
+{% extends "panel/base.html" %}
+{% block title %}Xarita{% endblock %}
+{% block content %}
+<div class="row two">
+  <section class="card">
+    <h2>Xaritani chizish</h2>
+    <p class="sub">Kataklarni boʻyab muzey rejasini tuzing: <b>devor</b>, <b>pol</b> va <b>kirish</b> nuqtasi. Saqlangan xarita boʻyicha muzey xuddi shu yoʻlaklardan quriladi.</p>
+
+    <div class="mapsizes" style="margin-top:14px">
+      <label class="sub">Ustunlar <input id="cols" type="number" min="5" max="45" value="9"></label>
+      <label class="sub">Qatorlar <input id="rows" type="number" min="3" max="45" value="9"></label>
+      <button class="btn sm" type="button" id="resize">Oʻlchamni qoʻllash</button>
+    </div>
+
+    <div class="maptools" style="margin-top:12px">
+      <button class="btn sm on" data-tool="wall" type="button">🧱 Devor</button>
+      <button class="btn sm" data-tool="floor" type="button">◻ Pol</button>
+      <button class="btn sm" data-tool="start" type="button">🚪 Kirish</button>
+      <button class="btn sm" type="button" id="clear">Tozalash</button>
+    </div>
+
+    <div class="presets" style="margin-top:10px">
+      <span class="sub">Tayyor shakllar:</span>
+      <button class="btn sm" data-preset="winding" type="button">Burilishli yoʻlak</button>
+      <button class="btn sm" data-preset="cross" type="button">Xoch zal</button>
+      <button class="btn sm" data-preset="ring" type="button">Aylanma zal</button>
+      <button class="btn sm" data-preset="rooms" type="button">Xonalar</button>
+    </div>
+
+    <canvas id="mapcv" style="margin-top:14px" aria-label="Muzey xaritasi muharriri"></canvas>
+
+    <div class="maphint" style="margin-top:10px">
+      <span><i class="dot" style="background:#3d2333"></i>devor</span>
+      <span><i class="dot" style="background:#f0cfc8"></i>pol</span>
+      <span><i class="dot" style="background:#c19a55"></i>kirish</span>
+      <span>Rasm ramkalari: <b id="cap">0</b></span>
+    </div>
+    <p id="mapmsg" class="sub"></p>
+
+    <form method="post" id="saveform" style="margin-top:12px">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="save">
+      <textarea name="map" id="mapdata" hidden></textarea>
+      <div class="actions"><button class="btn primary" type="submit">Xaritani saqlash</button><span class="sub">Saqlangach muzey darhol shu reja boʻyicha quriladi.</span></div>
+    </form>
+    <form method="post" style="margin-top:12px">
+      {% csrf_token %}<input type="hidden" name="action" value="auto">
+      <button class="btn sm" type="submit">Avtomatik xarita (rasmlar soniga moslashadi)</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Qanday ishlaydi</h2>
+    <p class="sub">Muzey boʻylab pingvin yuradi, rasmlar devorlarga osiladi. Har bir devorga tutash pol katagi bitta ramka boʻladi.</p>
+    <ul class="steps" style="margin-top:14px">
+      <li><span class="t">1</span><div><b>Polni boʻyang</b><small>Pingvin yuradigan yoʻlaklar.</small></div></li>
+      <li><span class="t">2</span><div><b>Kirish nuqtasini qoʻying</b><small>Bitta katak S boʻladi.</small></div></li>
+      <li><span class="t">3</span><div><b>Saqlang</b><small>Muzey shu xarita boʻyicha quriladi.</small></div></li>
+    </ul>
+    <p class="sub" style="margin-top:14px">Hozirgi xarita: <b>{{ cap }} ta ramka</b>, {{ photos }} ta rasm yuklangan.{% if custom %} Xarita qoʻlda chizilgan.{% else %} Xarita rasmlar soniga moslashgan.{% endif %}</p>
+    {% if custom and cap < photos %}
+    <div class="warn"><b>Diqqat:</b> bu xaritada {{ cap }} ta ramka bor, lekin {{ photos }} ta rasm yuklangan. Polni koʻpaytiring yoki avtomatik xaritaga qayting.</div>
+    {% endif %}
+    <p class="sub" style="margin-top:14px">Maslahat: yoʻlakni 1–2 katak keng qiling — pingvin va kamera bemalol oʻtadi. Xarita juda katta boʻlsa, sayt sekinlashmaydi, lekin yurish uzoqroq boʻladi.</p>
+  </section>
+</div>
+{{ presets|json_script:"presets" }}
+{{ current|json_script:"curmap" }}
+<script>
+(function(){
+  var cv=document.getElementById('mapcv'), g=cv.getContext('2d');
+  var cur=JSON.parse(document.getElementById('curmap').textContent||'[]');
+  var PRESETS=JSON.parse(document.getElementById('presets').textContent||'{}');
+  var cols=(cur[0]||'#########').length, rows=cur.length||9;
+  var grid=[], tool='wall', painting=false;
+  var CS=24, DIR=[[0,-1],[1,0],[0,1],[-1,0]], RESERVED={{ reserved }};
+  var colsIn=document.getElementById('cols'), rowsIn=document.getElementById('rows');
+  var capEl=document.getElementById('cap'), msg=document.getElementById('mapmsg');
+
+  function make(){
+    grid=[];
+    for(var z=0;z<rows;z++){
+      var line=cur[z]||'', row=[];
+      for(var x=0;x<cols;x++) row.push(line[x]==='.'||line[x]==='S'?line[x]:'#');
+      grid.push(row);
+    }
+  }
+  function findStart(){
+    for(var z=0;z<rows;z++)for(var x=0;x<cols;x++)if(grid[z][x]==='S')return [x,z];
+    return null;
+  }
+  function analyze(){
+    var st=findStart(), floor=0;
+    for(var z=0;z<rows;z++)for(var x=0;x<cols;x++)if(grid[z][x]!=='#')floor++;
+    if(!st){capEl.textContent='0';msg.textContent='Kirish nuqtasini (S) qoʻying — saqlash uchun shart.';msg.style.color='#a4323f';return false;}
+    var seen={}, q=[st], out=0; seen[st[0]+','+st[1]]=1;
+    while(q.length){
+      var c=q.shift();
+      for(var i=0;i<4;i++){
+        var nx=c[0]+DIR[i][0], nz=c[1]+DIR[i][1];
+        if(nx<0||nz<0||nx>=cols||nz>=rows||grid[nz][nx]==='#'){out++;}
+        else if(!seen[nx+','+nz]){seen[nx+','+nz]=1;q.push([nx,nz]);}
+      }
+    }
+    var pc=Math.max(0,out-RESERVED);
+    capEl.textContent=pc;
+    var reached=Object.keys(seen).length;
+    if(reached<floor){msg.textContent='Poldan ajralgan qismlar bor — ularga yetib boʻlmaydi.';msg.style.color='#8a6d1f';}
+    else{msg.textContent='✓ Xarita tayyor: '+pc+' ta rasm ramkasi. Saqlashingiz mumkin.';msg.style.color='#2f7d55';}
+    return true;
+  }
+  function draw(){
+    cv.width=cols*CS; cv.height=rows*CS;
+    g.clearRect(0,0,cv.width,cv.height);
+    for(var z=0;z<rows;z++)for(var x=0;x<cols;x++){
+      var c=grid[z][x];
+      g.fillStyle = c==='#'?'#3d2333':(c==='S'?'#c19a55':'#f0cfc8');
+      g.fillRect(x*CS,z*CS,CS-1,CS-1);
+      if(c==='S'){g.beginPath();g.arc(x*CS+CS/2,z*CS+CS/2,CS*.22,0,7);g.fillStyle='#4a1d36';g.fill();}
+    }
+    analyze();
+  }
+  function cellAt(e){
+    var r=cv.getBoundingClientRect();
+    var x=Math.floor((e.clientX-r.left)/r.width*cols), z=Math.floor((e.clientY-r.top)/r.height*rows);
+    return (x>=0&&z>=0&&x<cols&&z<rows)?[x,z]:null;
+  }
+  function paint(x,z){
+    if(tool==='start'){
+      var old=findStart(); if(old) grid[old[1]][old[0]]='.';
+      grid[z][x]='S';
+    }else{
+      if(grid[z][x]==='S')return;
+      grid[z][x]= tool==='wall'?'#':'.';
+    }
+    draw();
+  }
+  cv.addEventListener('pointerdown',function(e){
+    var c=cellAt(e); if(!c)return; painting=true; cv.setPointerCapture(e.pointerId);
+    if(tool==='start'){paint(c[0],c[1]);painting=false;}else paint(c[0],c[1]);
+    e.preventDefault();
+  });
+  cv.addEventListener('pointermove',function(e){
+    if(!painting)return; var c=cellAt(e); if(!c)return;
+    if(tool==='start'){paint(c[0],c[1]);painting=false;}else paint(c[0],c[1]);
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(t){cv.addEventListener(t,function(){painting=false;});});
+
+  document.querySelectorAll('[data-tool]').forEach(function(b){
+    b.addEventListener('click',function(){
+      tool=b.dataset.tool;
+      document.querySelectorAll('[data-tool]').forEach(function(x){x.classList.toggle('on',x===b)});
+    });
+  });
+  document.querySelectorAll('[data-preset]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var p=PRESETS[b.dataset.preset]; if(!p)return;
+      cur=p; cols=p[0].length; rows=p.length;
+      colsIn.value=cols; rowsIn.value=rows; make(); draw();
+    });
+  });
+  document.getElementById('clear').onclick=function(){
+    grid=[];for(var z=0;z<rows;z++){var r=[];for(var x=0;x<cols;x++)r.push('#');grid.push(r);}
+    draw();
+  };
+  document.getElementById('resize').onclick=function(){
+    var nc=Math.max(5,Math.min(45,+colsIn.value||cols)), nr=Math.max(3,Math.min(45,+rowsIn.value||rows)), old=grid;
+    var ng=[];for(var z=0;z<nr;z++){var r=[];for(var x=0;x<nc;x++)r.push(old[z]&&old[z][x]?old[z][x]:'#');ng.push(r);}
+    cols=nc;rows=nr;grid=ng;colsIn.value=nc;rowsIn.value=nr;draw();
+  };
+  document.getElementById('saveform').onsubmit=function(e){
+    if(!findStart()){e.preventDefault();msg.textContent='Kirish nuqtasi (S) yoʻq — saqlab boʻlmaydi.';msg.style.color='#a4323f';return;}
+    document.getElementById('mapdata').value=grid.map(function(r){return r.join('')}).join('\n');
+  };
+
+  colsIn.value=cols; rowsIn.value=rows; make(); draw();
+})();
+</script>
+{% endblock %}

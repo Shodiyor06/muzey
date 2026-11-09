@@ -1,0 +1,41 @@
+{% extends "panel/base.html" %}
+{% block title %}Rasmlar{% endblock %}
+{% block content %}
+<div class="row">
+  <section class="card">
+    <h2>Rasm yuklash</h2>
+    <p class="sub">Bir vaqtda bir nechta rasm tanlash mumkin. Muzey rasmlar soniga qarab oʻzi uzayadi — {{ photos|length }} ta rasm uchun {{ cap }} ta ramka bor.</p>
+    <form class="styled" method="post" enctype="multipart/form-data" action="{% url 'panel_upload' %}" style="margin-top:14px">
+      {% csrf_token %}
+      <div class="field">
+        <label for="{{ form.images.id_for_label }}">Rasmlar</label>
+        {{ form.images }}
+        <span class="helptext">JPG, PNG, WebP. Har biri avtomatik kichraytiriladi.</span>
+        {{ form.images.errors }}
+      </div>
+      <div class="actions"><button class="btn primary" type="submit">Yuklash</button><span class="sub">Yuklangandan keyin har biriga sana va hikoya yozishingiz mumkin.</span></div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Barcha rasmlar · {{ photos|length }}</h2>
+    <p class="sub">Tartib raqami kichik boʻlgan rasm muzey boshida turadi.</p>
+    {% if photos %}
+    <div class="ph-grid" style="margin-top:14px">
+      {% for p in photos %}
+      <figure>
+        <a class="im" href="{% url 'panel_photo' p.pk %}"><img src="{{ p.image.url }}" alt="" loading="lazy"></a>
+        <figcaption><b>{{ p.title|default:"(izohsiz)" }}</b><span>{{ p.date|date:"d.m.Y"|default:"sana yoʻq" }} · #{{ p.order }} · ♥ {{ p.hearts_n }}</span></figcaption>
+        <div class="tools">
+          <a class="btn sm" href="{% url 'panel_photo' p.pk %}">Tahrirlash</a>
+          <form method="post" action="{% url 'panel_photo_delete' p.pk %}" onsubmit="return confirm('Bu rasm oʻchirilsinmi?')">{% csrf_token %}<button class="btn sm danger" type="submit">Oʻchirish</button></form>
+        </div>
+      </figure>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">Hali rasm yoʻq. Yuqoridagi forma orqali yuklang.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>{{ title }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+html,body{height:100%;margin:0}
+body{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 30%,#4a1d36,#1a0a14 72%);color:#faf1e6;font-family:'Fraunces',Georgia,serif;padding:24px}
+.box{width:min(420px,100%);text-align:center}
+.seal{width:92px;height:92px;border-radius:50%;margin:0 auto 26px;background:radial-gradient(circle at 34% 28%,#f0d9a0,#c19a55 45%,#8a6a2f 100%);box-shadow:0 14px 38px rgba(0,0,0,.45),inset 0 1px 1px rgba(255,255,255,.55);position:relative}
+.seal:before{content:"";position:absolute;left:50%;top:26px;width:22px;height:22px;border-radius:50%;background:#2a1220;transform:translateX(-50%)}
+.seal:after{content:"";position:absolute;left:50%;top:43px;width:12px;height:24px;background:#2a1220;transform:translateX(-50%);clip-path:polygon(18% 0,82% 0,100% 100%,0 100%)}
+.kicker{font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;color:#c8a06a;margin:0 0 10px}
+h1{font-weight:400;font-size:clamp(1.9rem,6vw,2.5rem);color:#f0cfc8;margin:0 0 12px;line-height:1.15}
+p{font-style:italic;margin:0 0 1.5rem;opacity:.82;line-height:1.6}
+.tg{display:flex;justify-content:center;min-height:48px;margin:6px 0 4px}
+.note{font-style:normal;font-size:.85rem;color:#e9cfc8;background:rgba(255,255,255,.06);border:1px solid rgba(210,168,92,.28);border-radius:14px;padding:12px 14px;margin:0 0 16px;text-align:left}
+.note b{color:#f0d9a0;font-weight:600}
+.note a{color:#f0cfc8}
+.e{color:#ffb3c1;margin:14px 0 0;min-height:1.2em;font-style:normal;font-size:.92rem}
+.foot{margin-top:30px;font-size:.78rem;color:#b48f83}
+.foot a{color:#d9b9b0;text-decoration:none;border-bottom:1px solid rgba(217,185,176,.35);padding-bottom:1px}
+.foot a:hover{color:#fff;border-color:#fff}
+.rule{width:54px;height:1px;background:rgba(210,168,92,.5);margin:0 auto 22px}
+</style></head><body>
+<div class="box">
+  <div class="seal" aria-hidden="true"></div>
+  <p class="kicker">Shaxsiy muzey</p>
+  <h1>{{ title }}</h1>
+  <p>Bu muzey faqat egasi va unga yuborilgan<br>shaxsiy havola egasi uchun ochiq.</p>
+  <div class="rule"></div>
+
+  {% if ready and bot and owner_ready %}
+    <div class="tg">
+      <script async src="https://telegram.org/js/telegram-widget.js?22"
+        data-telegram-login="{{ bot }}" data-size="large" data-radius="24"
+        data-userpic="false"
+        data-auth-url="{{ request.scheme }}://{{ request.get_host }}{% url 'telegram_enter' %}"></script>
+    </div>
+    <p style="font-size:.8rem;margin-bottom:0">Egasi boʻlsangiz, Telegram akkauntingiz bilan kiring.</p>
+  {% elif ready and bot %}
+    <div class="note">Egasi Telegram akkauntini hali bogʻlamagan. Admin panelda <b>Telegram ID</b> ni kiriting.</div>
+  {% else %}
+    <div class="note">Muzey egasi tomonidan yopilgan. Sizga shaxsiy havola yuborilgan boʻlsa, uni oching — parol soʻralmaydi.</div>
+  {% endif %}
+
+  <p class="e">{{ err }}</p>
+  <p class="foot"><a href="{{ admin_url }}">Egasi: admin panelga kirish</a></p>
+</div>
+</body></html>

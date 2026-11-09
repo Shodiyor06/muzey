@@ -1,0 +1,205 @@
+{% load static %}<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Boshqaruv{% endblock %} · {{ museum.title }} · Muzey</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbf5ec;--card:#fffdf9;--ink:#3a2230;--soft:#7d6472;--line:#eadfd2;
+  --rose:#7a3f56;--rose-dark:#5e2e42;--brass:#c19a55;--brass-soft:#f3e7cf;
+  --good:#2f7d55;--good-bg:#e6f4ea;--warn:#8a6d1f;--warn-bg:#fff6dc;--bad:#a4323f;--bad-bg:#fdecee;
+  --r:18px;--shadow:0 10px 30px rgba(74,29,54,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Fraunces',Georgia,'Times New Roman',serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--rose);text-decoration:none}
+a:hover{color:var(--rose-dark)}
+h1,h2,h3,h4{margin:0;font-weight:600;line-height:1.2}
+h1{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:400}
+h2{font-size:1.25rem}
+h3{font-size:1.05rem}
+p{margin:0}
+small{font-size:.85em}
+img{max-width:100%}
+
+/* ---- header ---- */
+.top{position:sticky;top:0;z-index:20;background:rgba(74,29,54,.97);color:#faf1e6;box-shadow:0 6px 24px rgba(40,12,28,.22)}
+.top-in{max-width:1180px;margin:0 auto;padding:12px 22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center;color:#faf1e6;margin-right:auto}
+.brand:hover{color:#fff}
+.brand .pg{font-size:1.9rem;line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.3))}
+.brand b{display:block;font-size:1.05rem;font-weight:600}
+.brand small{display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;opacity:.6}
+nav.pn{display:flex;gap:4px;flex-wrap:wrap}
+nav.pn a{color:#f0cfc8;padding:8px 14px;border-radius:999px;font-size:.92rem;white-space:nowrap;position:relative}
+nav.pn a:hover{background:rgba(255,255,255,.1);color:#fff}
+nav.pn a.on{background:var(--brass);color:#2a1220;font-weight:600}
+nav.pn a i{position:absolute;top:2px;right:2px;background:#e0576f;color:#fff;font-style:normal;font-size:.65rem;min-width:16px;height:16px;border-radius:99px;display:grid;place-items:center;padding:0 4px}
+.who{display:flex;gap:14px;align-items:center;font-size:.85rem;color:#e8cfc9}
+.who a{color:#f0cfc8;border-bottom:1px solid rgba(240,207,200,.3);padding-bottom:1px}
+.who a:hover{color:#fff;border-color:#fff}
+.who span{opacity:.65}
+
+main{max-width:1180px;margin:0 auto;padding:26px 22px 70px}
+footer{max-width:1180px;margin:0 auto;padding:0 22px 40px;color:var(--soft);font-size:.82rem;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* ---- messages ---- */
+.msg{padding:12px 16px;border-radius:14px;margin-bottom:16px;font-size:.95rem;border:1px solid transparent}
+.msg.success{background:var(--good-bg);border-color:#bfe3cb;color:#1f5c3c}
+.msg.error{background:var(--bad-bg);border-color:#f2c6cc;color:#8a2532}
+.msg.warning{background:var(--warn-bg);border-color:#ecdba5;color:var(--warn)}
+
+/* ---- layout blocks ---- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow)}
+.card>*+*{margin-top:12px}
+.sub{color:var(--soft);font-size:.9rem}
+.row{display:grid;gap:18px}
+.two{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.three{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.stat .n{font-size:2.15rem;font-weight:600;line-height:1.05;margin-top:4px}
+.stat .n span{font-size:.8rem;font-weight:400;color:var(--soft)}
+.stat .sub{margin-top:4px}
+
+.hero{background:linear-gradient(135deg,#4a1d36,#7a3f56 60%,#8d5468);color:#faf1e6;border:0;padding:28px}
+.hero h1{color:#faf1e6}
+.hero .sub{color:#e9cfc8;max-width:44rem}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.hero .link{margin-top:16px;background:rgba(0,0,0,.22);border-radius:12px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:.88rem}
+.hero .link code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#f0cfc8;word-break:break-all;background:none}
+.badge{display:inline-block;border-radius:99px;padding:3px 10px;font-size:.75rem;font-weight:600;vertical-align:middle}
+.badge.ok{background:#cdf0da;color:#14502a}
+.badge.no{background:#ffe4a8;color:#664d03}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:9px 17px;font:inherit;font-size:.9rem;cursor:pointer;text-decoration:none;transition:transform .08s,background .15s}
+.btn:hover{background:#faf3e8;color:var(--ink)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--brass);border-color:var(--brass);color:#2a1220;font-weight:600}
+.btn.primary:hover{background:#d0aa66}
+.btn.ghost{background:transparent;border-color:rgba(255,255,255,.35);color:#faf1e6}
+.btn.ghost:hover{background:rgba(255,255,255,.12);color:#fff}
+.btn.rose{background:var(--rose);border-color:var(--rose);color:#fff}
+.btn.rose:hover{background:var(--rose-dark);color:#fff}
+.btn.danger{color:var(--bad);border-color:#f0cbd1;background:#fff}
+.btn.danger:hover{background:var(--bad-bg)}
+.btn.sm{padding:5px 12px;font-size:.8rem}
+button.link{background:none;border:0;color:var(--rose);font:inherit;cursor:pointer;padding:0;text-decoration:underline}
+
+/* ---- bars / chart ---- */
+.bar{height:9px;border-radius:99px;background:#f0e6d9;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--brass));border-radius:99px}
+.chart{display:flex;align-items:flex-end;gap:10px;height:150px;margin-top:14px}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:.75rem;color:var(--soft)}
+.chart i{display:block;width:100%;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--brass),#a9834a);min-height:4px}
+.chart b{margin-bottom:5px;color:var(--ink);font-weight:600}
+
+/* ---- steps ---- */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.steps li{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff}
+.steps .t{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:700;font-size:.8rem;border:2px solid var(--line);color:var(--soft)}
+.steps .done .t{background:var(--good);border-color:var(--good);color:#fff}
+.steps .done b{text-decoration:line-through;color:var(--soft);font-weight:400}
+.steps div{flex:1;min-width:0}
+.steps small{display:block;color:var(--soft)}
+.steps a{white-space:nowrap;font-size:.82rem;font-weight:600}
+
+/* ---- photos ---- */
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.ph-grid figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.ph-grid .im{aspect-ratio:4/3;background:#f3e9dd;display:block}
+.ph-grid .im img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-grid figcaption{padding:8px 10px 10px;font-size:.82rem;display:grid;gap:2px}
+.ph-grid figcaption b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ph-grid figcaption span{color:var(--soft);font-size:.75rem}
+.ph-grid .tools{display:flex;gap:6px;padding:0 10px 10px;margin-top:auto}
+.ph-grid .tools a,.ph-grid .tools button{font-size:.75rem;padding:4px 10px}
+
+/* ---- forms ---- */
+form.styled{display:grid;gap:18px}
+.field{display:grid;gap:6px}
+.field>label{font-weight:600;font-size:.92rem}
+.field .helptext{color:var(--soft);font-size:.8rem}
+.field .errors{color:var(--bad);font-size:.82rem}
+.field input[type=text],.field input[type=date],.field input[type=password],.field input[type=number],.field input[type=email],.field textarea,.field select{
+  font:inherit;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px 13px;width:100%;max-width:640px}
+.field textarea{min-height:120px;resize:vertical}
+.field input[type=file]{font-size:.9rem}
+.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--brass);outline-offset:1px}
+.field input[type=checkbox]{width:18px;height:18px;accent-color:var(--rose)}
+.check{display:flex;gap:10px;align-items:flex-start}
+.check label{font-weight:400}
+fieldset{border:0;padding:0;margin:0;display:grid;gap:16px}
+legend{font-weight:600;font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--brass);padding:0 0 8px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.preview{width:132px;height:99px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block}
+
+/* ---- notices ---- */
+.warn{padding:14px 18px;border-radius:14px;background:var(--warn-bg);border:1px solid #ecdba5;color:var(--warn);font-size:.92rem}
+.warn b{color:#6b5414}
+.empty{color:var(--soft);font-style:italic;padding:10px 0}
+
+/* ---- guests ---- */
+.gl{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.gl li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.gl li.new{border-color:var(--brass);background:#fffaef}
+.gl .body{flex:1;min-width:0}
+.gl .body p{white-space:pre-line;overflow-wrap:anywhere}
+.gl small{color:var(--soft)}
+.gl form{margin:0}
+
+/* ---- map ---- */
+.maptools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.maptools .btn.on{background:var(--rose);border-color:var(--rose);color:#fff}
+#mapcv{display:block;width:100%;max-width:760px;height:auto;background:#2a1220;border-radius:14px;border:1px solid var(--line);touch-action:none;cursor:crosshair}
+.maphint{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--soft)}
+.maphint b{color:var(--ink)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+.mapsizes{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.mapsizes input{width:82px;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.presets{display:flex;gap:8px;flex-wrap:wrap}
+#mapmsg{min-height:1.4em;font-size:.88rem}
+
+@media (max-width:760px){
+  .top-in{padding:10px 14px;gap:10px}
+  .brand{margin-right:0;width:100%}
+  nav.pn{order:3;width:100%;overflow:auto;padding-bottom:2px}
+  .who{order:2;margin-left:auto}
+  main{padding:18px 14px 60px}
+  .card{padding:16px}
+  .hero{padding:20px}
+  .ph-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="{% url 'panel' %}"><span class="pg">🐧</span><span><b>{{ museum.title }}</b><small>boshqaruv paneli</small></span></a>
+    <nav class="pn">
+      <a href="{% url 'panel' %}" class="{% if page == 'home' %}on{% endif %}">Bosh sahifa</a>
+      <a href="{% url 'panel_photos' %}" class="{% if page == 'photos' %}on{% endif %}">Rasmlar</a>
+      <a href="{% url 'panel_settings' %}" class="{% if page == 'settings' %}on{% endif %}">Sozlamalar</a>
+      <a href="{% url 'panel_map' %}" class="{% if page == 'map' %}on{% endif %}">Xarita</a>
+      <a href="{% url 'panel_guests' %}" class="{% if page == 'guests' %}on{% endif %}">Mehmonlar{% if unseen %}<i>{{ unseen }}</i>{% endif %}</a>
+    </nav>
+    <div class="who">
+      <span>{{ user.get_username }}</span>
+      <a href="/" target="_blank" rel="noopener">Muzey ↗</a>
+      <a href="{% url 'admin:logout' %}">Chiqish</a>
+    </div>
+  </div>
+</header>
+<main>
+  {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<footer>
+  <span>{{ museum.title }} · boshqaruv paneli</span>
+  <span><a href="{% url 'admin:index' %}">Django admin</a></span>
+</footer>
+</body>
+</html>

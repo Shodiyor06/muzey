@@ -1,0 +1,14 @@
+{% extends "admin/base.html" %}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Muzey{% endblock %}
+{% block extrastyle %}{{ block.super }}
+<style>
+:root{--primary:#7a3f56;--secondary:#4a1d36;--accent:#d2a85c;--button-bg:#7a3f56;--button-hover-bg:#5e2e42;--default-button-bg:#4a1d36;--default-button-hover-bg:#341326;--link-fg:#7a3f56;--link-hover-color:#4a1d36;--header-bg:#4a1d36;--header-color:#faf1e6;--header-branding-color:#f0cfc8;--header-link-color:#faf1e6;--breadcrumbs-bg:#7a3f56;--breadcrumbs-fg:#f0cfc8;--object-tools-bg:#7a3f56;--object-tools-hover-bg:#5e2e42}
+#site-name a{font-weight:600;letter-spacing:.01em}
+.module{border-radius:12px;overflow:hidden}
+.button,input[type=submit],.object-tools a{border-radius:999px!important}
+fieldset.module{border-radius:14px}
+fieldset.module h2{background:var(--secondary)}
+</style>
+{% endblock %}
+{% block branding %}<h1 id="site-name"><a href="{% url 'admin:index' %}">🖼 Muzey boshqaruvi</a></h1>{% endblock %}
+{% block nav-global %}{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "panel/base.html" %}
+{% block title %}Mehmonlar{% endblock %}
+{% block content %}
+<section class="card">
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+    <div>
+      <h2>Mehmonlar daftari</h2>
+      <p class="sub">{{ entries|length }} ta yozuv{% if unseen %} · {{ unseen }} tasi yangi{% endif %}</p>
+    </div>
+    {% if unseen %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="seen">
+      <button class="btn sm" type="submit">Hammasini oʻqildi deb belgilash</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if entries %}
+  <ul class="gl" style="margin-top:16px">
+    {% for e in entries %}
+    <li class="{% if not e.seen %}new{% endif %}">
+      <div class="body">
+        <p>{% if e.text %}{{ e.text }}{% else %}♥ Yurakcha{% endif %}</p>
+        <small>{% if e.photo %}“{{ e.photo.title|default:e.photo.pk }}” rasmiga · {% endif %}{{ e.created|date:"d.m.Y H:i" }}{% if not e.seen %} · <b>yangi</b>{% endif %}</small>
+      </div>
+      <form method="post" onsubmit="return confirm('Bu xabar oʻchirilsinmi?')">{% csrf_token %}
+        <input type="hidden" name="action" value="delete"><input type="hidden" name="pk" value="{{ e.pk }}">
+        <button class="btn sm danger" type="submit">Oʻchirish</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">Hali xabar yoʻq. Sevgilingiz muzeyda rasmni bosib yurakcha yoki izoh qoldirsa, shu yerda chiqadi.</p>
+  {% endif %}
+</section>
+{% endblock %}
