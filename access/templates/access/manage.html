@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Taklif va mehmonlar</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}
+body{margin:0;background:#160812;color:#faf1e6;font-family:system-ui,sans-serif;padding:24px 16px 60px}
+.w{max-width:900px;margin:0 auto;display:grid;gap:18px}
+h1{font-family:Georgia,serif;font-weight:400;color:#f0cfc8;margin:0}h2{margin:0 0 4px;font-size:1.1rem}
+.c{background:#22101b;border:1px solid rgba(210,168,92,.25);border-radius:16px;padding:18px}
+.s{margin:0 0 12px;font-size:.88rem;opacity:.7}
+input,select{font:inherit;color:inherit;background:rgba(255,255,255,.07);border:1px solid rgba(210,168,92,.35);border-radius:10px;padding:.55rem .8rem}
+button{font:inherit;cursor:pointer;border:0;border-radius:999px;padding:.55rem 1.1rem;background:#d2a85c;color:#2a1220;font-weight:700}
+button.o{background:transparent;color:#faf1e6;border:1px solid rgba(210,168,92,.5)}button.d{background:#8c2f45;color:#fff}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #d2a85c;outline-offset:2px}
+.r{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.t{width:100%;border-collapse:collapse;font-size:.92rem}.t td,.t th{padding:8px 6px;border-top:1px solid rgba(210,168,92,.18);text-align:left;vertical-align:middle}
+.t th{opacity:.6;font-weight:400;border:0}code{word-break:break-all;color:#f0cfc8}
+.n{background:rgba(76,195,138,.15);border:1px solid #4cc38a;border-radius:12px;padding:12px}
+.f{background:rgba(210,168,92,.15);border-radius:10px;padding:10px 14px}
+form{margin:0;display:inline}a{color:#d2a85c}
+</style></head><body><div class="w">
+<div class="r" style="justify-content:space-between"><h1>🐧 Taklif va mehmonlar</h1><a href="/admin/">← Boshqaruv paneli</a></div>
+{% if flash %}<div class="f">{{ flash }}</div>{% endif %}
+{% if new_link %}<div class="n"><b>Yangi havola tayyor.</b> Nusxalab yuboring:<br><code id="nl">{{ new_link }}</code><div class="r" style="margin-top:8px"><button type="button" class="o" onclick="cp('nl',this)">Nusxa olish</button></div></div>{% endif %}
+
+<div class="c"><h2>Taklif havolasi yaratish</h2><p class="s">Muzeyni kimgadir koʻrsatish uchun. Havola tanlangan muddatdan keyin ishlamay qoladi.</p>
+<form method="post" class="r">{% csrf_token %}<input type="hidden" name="a" value="create">
+<input name="label" placeholder="Kimga (ixtiyoriy)" maxlength="80">
+<select name="days" aria-label="Muddat"><option value="1">1 kun</option><option value="2" selected>2 kun</option><option value="7">7 kun</option></select>
+<button>Yaratish</button></form></div>
+
+<div class="c"><h2>Faol takliflar</h2><p class="s">Hozir ishlayotgan havolalar.</p>
+{% if invites %}<table class="t"><tr><th>Kimga</th><th>Tugashiga</th><th>Ochilgan</th><th></th></tr>
+{% for t in invites %}<tr><td>{{ t.label }}</td><td>{{ t.expires_at|timeuntil }}</td><td>{{ t.uses }} marta</td>
+<td><form method="post">{% csrf_token %}<input type="hidden" name="a" value="revoke"><input type="hidden" name="id" value="{{ t.id }}"><button class="d">Bekor qilish</button></form></td></tr>{% endfor %}</table>
+{% else %}<p class="s">Faol taklif yoʻq.</p>{% endif %}</div>
+
+<div class="c"><h2>Telegram bot</h2>
+<p class="s">{% if has_token %}Token berilgan.{% else %}<b>TELEGRAM_BOT_TOKEN</b> hali berilmagan (Render → Environment).{% endif %}
+{% if bot %} Bot: <a href="{{ bot }}">{{ bot }}</a>{% else %} <b>TELEGRAM_BOT_USERNAME</b> berilmagan.{% endif %}
+Mehmon havolalari {{ days }} kun ishlaydi.</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="a" value="webhook"><button class="o">Webhookni oʻrnatish / yangilash</button></form></div>
+
+<div class="c"><h2>Roʻyxatdan oʻtgan mehmonlar ({{ visitors|length }})</h2><p class="s">Bot orqali kirganlar.</p>
+{% if visitors %}<table class="t"><tr><th>Ism</th><th>Username</th><th>Qoʻshilgan</th><th>Oxirgi kirish</th><th></th></tr>
+{% for v in visitors %}<tr><td>{{ v.first_name|default:"-" }}</td><td>{% if v.username %}@{{ v.username }}{% else %}-{% endif %}</td><td>{{ v.created|date:"d.m.Y" }}</td><td>{{ v.last_seen|date:"d.m H:i"|default:"-" }}</td>
+<td><form method="post">{% csrf_token %}<input type="hidden" name="id" value="{{ v.id }}">{% if v.blocked %}<input type="hidden" name="a" value="unblock"><button class="o">Ruxsat berish</button>{% else %}<input type="hidden" name="a" value="block"><button class="d">Bloklash</button>{% endif %}</form></td></tr>{% endfor %}</table>
+{% else %}<p class="s">Hali hech kim kirmagan.</p>{% endif %}</div>
+</div>
+<script>function cp(id,b){var t=document.getElementById(id).textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Nusxalandi'}).catch(function(){})}</script>
+</body></html>
