@@ -9,11 +9,18 @@ load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG", "1") == "1"
-ALLOWED_HOSTS = [urlparse(h).hostname or h for h in _list("ALLOWED_HOSTS")]
+import os
+from urllib.parse import urlparse
+
+ALLOWED_HOSTS = [
+    urlparse(h.strip()).hostname or h.strip()
+    for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()
+]
 if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(os.environ["RENDER_EXTERNAL_HOSTNAME"])
 ALLOWED_HOSTS = ALLOWED_HOSTS or ["*"]
-CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h != "*"] + _list("CSRF_TRUSTED_ORIGINS")
+
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h != "*"]
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Ixtiyoriy: bot tokenini muhit oʻzgaruvchisida saqlash mumkin (panelda ham kiritiladi).
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
