@@ -14,7 +14,7 @@ admin.site.index_title = "Bosh sahifa"
 class SettingsForm(forms.ModelForm):
     class Meta:
         model = SiteSettings
-        exclude = ("map_data", "telegram_token", "share_token")
+        exclude = ("map_data", "share_token")
 
 
 @admin.register(SiteSettings)
@@ -26,10 +26,8 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                                "description": "Kirish ekranida koʻrinadigan sarlavha va qisqa xat."}),
         ("2. Zal koʻrinishi", {"fields": ("layout", "palette"),
                                "description": "Zal shakli va devor rangi. Rasmlar koʻp boʻlsa, kattaroq zal tanlang."}),
-        ("3. Kirish", {"fields": ("telegram_bot", "telegram_id"),
-                       "description": "Muzeyga faqat shu Telegram akkaunt egasi kira oladi. Bot tokeni va havola asosiy panelda boshqariladi."}),
-        ("4. Fon musiqasi", {"fields": ("music",)}),
-        ("5. Soʻnggi xona (xat va video)", {"fields": ("letter_title", "letter_text", "together_since", "video", "letter_pos", "video_pos"),
+        ("3. Fon musiqasi", {"fields": ("music",)}),
+        ("4. Soʻnggi xona (xat va video)", {"fields": ("letter_title", "letter_text", "together_since", "video", "letter_pos", "video_pos"),
                                            "description": "Xat va video oxirgi xonada chiqadi. Video xat yonidagi kichik ekranda jiringlaydi."}),
     ]
 
@@ -39,8 +37,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
-    def changelist_view(self, request, extra_context=None):
-        return redirect(reverse("admin:gallery_sitesettings_change", args=[SiteSettings.load().pk]))
+    list_display = ("title", "owner")
 
     def response_change(self, request, obj):
         messages.success(request, "Sozlamalar saqlandi.")
@@ -63,10 +60,10 @@ class BulkForm(forms.Form):
 
 @admin.register(Photo)
 class PhotoAdmin(admin.ModelAdmin):
-    list_display = ("thumb", "title", "date", "order", "hearts", "comments")
+    list_display = ("thumb", "title", "owner", "date", "order", "hearts", "comments")
     list_display_links = ("thumb",)
     list_editable = ("title", "order")
-    fields = ("title", "date", "story", "image", "order", "thumb")
+    fields = ("owner", "title", "date", "story", "image", "order", "thumb")
     readonly_fields = ("thumb",)
     change_list_template = "admin/gallery/photo/change_list.html"
 
@@ -93,9 +90,9 @@ class PhotoAdmin(admin.ModelAdmin):
     def bulk(self, request):
         form = BulkForm(request.POST or None, request.FILES or None)
         if request.method == "POST" and form.is_valid():
-            start = Photo.objects.count()
+            start = Photo.objects.filter(owner=request.user).count()
             for i, f in enumerate(form.cleaned_data["images"]):
-                Photo.objects.create(image=f, title=f.name.rsplit(".", 1)[0], order=start + i)
+                Photo.objects.create(owner=request.user, image=f, title=f.name.rsplit(".", 1)[0], order=start + i)
             messages.success(request, "Rasmlar yuklandi. Endi har biriga sana va hikoya yozishingiz mumkin.")
             return redirect("admin:gallery_photo_changelist")
         ctx = {**self.admin_site.each_context(request), "form": form, "title": "Koʻp rasm yuklash"}

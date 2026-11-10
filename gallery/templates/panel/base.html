@@ -187,9 +187,9 @@ legend{font-weight:600;font-size:.75rem;letter-spacing:.16em;text-transform:uppe
       <a href="{% url 'panel_guests' %}" class="{% if page == 'guests' %}on{% endif %}">Mehmonlar{% if unseen %}<i>{{ unseen }}</i>{% endif %}</a>
     </nav>
     <div class="who">
-      <span>{{ user.get_username }}</span>
-      <a href="/" target="_blank" rel="noopener">Muzey ↗</a>
-      <a href="{% url 'admin:logout' %}">Chiqish</a>
+      <span>{{ user.first_name|default:user.get_username }}</span>
+      <a href="{% url 'own_museum' %}" target="_blank" rel="noopener">Muzey ↗</a>
+      <a href="{% url 'logout' %}">Chiqish</a>
     </div>
   </div>
 </header>
@@ -199,7 +199,7 @@ legend{font-weight:600;font-size:.75rem;letter-spacing:.16em;text-transform:uppe
 </main>
 <footer>
   <span>{{ museum.title }} · boshqaruv paneli</span>
-  <span><a href="{% url 'admin:index' %}">Django admin</a></span>
+  <span>{% if user.is_superuser %}<a href="{% url 'admin:index' %}">Django admin</a>{% endif %}</span>
 </footer>
 </body>
 </html>

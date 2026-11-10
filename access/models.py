@@ -6,6 +6,9 @@ from django.utils import timezone
 
 
 class TgVisitor(models.Model):
+    """Telegram orqali roʻyxatdan oʻtgan foydalanuvchi; ``user`` — uning profili."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,
+                                related_name="tg")
     tg_id = models.BigIntegerField(unique=True)
     first_name = models.CharField(max_length=120, blank=True)
     username = models.CharField(max_length=80, blank=True)
@@ -21,13 +24,13 @@ class TgVisitor(models.Model):
 
 
 class AccessToken(models.Model):
-    KINDS = [("visitor", "Mehmon"), ("invite", "Taklif")]
+    KINDS = [("login", "Kirish"), ("visitor", "Mehmon (eski)"), ("invite", "Taklif (eski)")]
     key = models.CharField(max_length=64, unique=True)
-    kind = models.CharField(max_length=10, choices=KINDS, default="visitor")
+    kind = models.CharField(max_length=10, choices=KINDS, default="login")
     visitor = models.ForeignKey(TgVisitor, null=True, blank=True, on_delete=models.CASCADE, related_name="tokens")
     label = models.CharField(max_length=80, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
+    expires_at = models.DateTimeField(null=True, blank=True, help_text="Boʻsh — muddatsiz.")
     uses = models.PositiveIntegerField(default=0)
     revoked = models.BooleanField(default=False)
 
@@ -35,10 +38,13 @@ class AccessToken(models.Model):
         ordering = ["-created"]
 
     def valid(self):
-        return not self.revoked and self.expires_at > timezone.now() and not (self.visitor and self.visitor.blocked)
+        if self.revoked or (self.expires_at and self.expires_at <= timezone.now()):
+            return False
+        v = self.visitor
+        return bool(v and v.user_id and not v.blocked and v.user.is_active)
 
     @classmethod
-    def issue(cls, kind, days=None, visitor=None, label=""):
-        days = days or getattr(settings, "ACCESS_DAYS", 2)
+    def issue(cls, kind="login", days=None, visitor=None, label=""):
+        """Yangi kalit. ``days`` berilmasa — muddatsiz (bot 2 kunlik havola yaratmaydi)."""
         return cls.objects.create(key=secrets.token_urlsafe(24), kind=kind, visitor=visitor, label=label[:80],
-                                  expires_at=timezone.now() + timedelta(days=days))
+                                  expires_at=timezone.now() + timedelta(days=days) if days else None)

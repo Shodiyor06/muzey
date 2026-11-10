@@ -8,12 +8,18 @@
     <div class="acts">
       <a class="btn primary" href="{% url 'panel_upload' %}">+ Rasm yuklash</a>
       <a class="btn ghost" href="{% url 'panel_map' %}">Xaritani chizish</a>
-      <a class="btn ghost" href="/" target="_blank" rel="noopener">Muzeyni koʻrish ↗</a>
+      <a class="btn ghost" href="{% url 'own_museum' %}" target="_blank" rel="noopener">Muzeyni koʻrish ↗</a>
     </div>
-    <div class="link"><span>Havola:</span><code id="url">{{ dash.url }}</code>
+    {% if dash.share %}
+    <div class="link"><span>Sevgilingiz uchun havola:</span><code id="url">{{ dash.url }}</code>
       <button class="btn ghost sm" id="cp" type="button">Nusxa olish</button>
-      {% if dash.share %}<span class="badge ok">Shaxsiy havola bilan</span>{% else %}<span class="badge ok">Faqat egasi uchun</span>{% endif %}
+      <span class="badge ok">Faqat shu havola bilan</span>
     </div>
+    {% else %}
+    <div class="link"><span>Hozir muzey faqat sizga ochiq.</span>
+      <a class="btn ghost sm" href="{% url 'panel_settings' %}">Sevgilingiz uchun havola yaratish</a>
+    </div>
+    {% endif %}
   </section>
 
   {% if dash.over %}

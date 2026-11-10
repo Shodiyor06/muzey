@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Muzey</title>
+<style>
+html,body{height:100%;margin:0}body{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#4a1d36,#1a0a14 70%);color:#faf1e6;font-family:Georgia,serif;padding:20px;text-align:center}
+.c{max-width:360px}h1{font-weight:400;font-size:2.2rem;color:#f0cfc8;margin:.6rem 0}p{line-height:1.6;opacity:.9;margin:0 0 1.6rem}
+a{display:inline-block;background:#d2a85c;color:#2a1220;font-weight:700;text-decoration:none;padding:.9rem 1.8rem;border-radius:999px}
+a:focus-visible{outline:3px solid #fff;outline-offset:3px}.p{font-size:3rem}
+</style></head><body><div class="c"><div class="p">🐧</div>
+<h1>{% if expired %}Havola muddati tugagan{% else %}Bu muzeyga kirish yopiq{% endif %}</h1>
+<p>{% if expired %}Bu havola endi ishlamaydi. Telegram botdan yangisini oling.{% else %}Kirish uchun Telegram botni oching va “Muzey” tugmasini bosing. Bot sizga shaxsiy havola beradi.{% endif %}</p>
+{% if bot %}<a href="{{ bot }}">Telegram botni ochish</a>{% endif %}</div></body></html>

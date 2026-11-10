@@ -29,51 +29,8 @@
   </section>
 
   <section class="card">
-    <h2>Kirish · Telegram</h2>
-    <p class="sub">Muzeyga faqat egasi — yaʼni siz — Telegram orqali kira olasiz. Boshqa Telegram akkauntlar kira olmaydi.
-      {% if tg_owner %}<span class="badge ok">Telegram bogʻlangan</span>{% else %}<span class="badge no">Telegram bogʻlanmagan</span>{% endif %}
-      {% if tg_ready %}<span class="badge ok">Token bor</span>{% else %}<span class="badge no">Token yoʻq</span>{% endif %}
-    </p>
-
-    <div class="field">
-      <label for="{{ form.telegram_bot.id_for_label }}">{{ form.telegram_bot.label }}</label>{{ form.telegram_bot }}{{ form.telegram_bot.errors }}
-      <span class="helptext">@BotFather da bot yarating va username ni shu yerga yozing. BotFather’da bot domenini ham sayt manziliga qoʻying (/setdomain).</span>
-    </div>
-    <div class="field">
-      <label for="{{ form.telegram_id.id_for_label }}">{{ form.telegram_id.label }}</label>{{ form.telegram_id }}{{ form.telegram_id.errors }}
-      <span class="helptext">Oʻz ID ingizni bilish uchun Telegram’da <b>@userinfobot</b> ga yozing. Faqat shu ID kira oladi.</span>
-    </div>
-    <div class="field">
-      <label for="{{ form.telegram_token.id_for_label }}">{{ form.telegram_token.label }}</label>{{ form.telegram_token }}{{ form.telegram_token.errors }}
-      {% if form.telegram_token.help_text %}<span class="helptext">{{ form.telegram_token.help_text }}</span>{% endif %}
-    </div>
-    <div class="field check">{{ form.clear_token }}<label for="{{ form.clear_token.id_for_label }}">{{ form.clear_token.label }}<span class="helptext" style="display:block">Belgilansa, saqlangan token oʻchiriladi.</span></label></div>
-
-    <details class="sub" style="border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#faf3e8">
-      <summary style="cursor:pointer;font-weight:600">Telegram botni qanday ulash mumkin?</summary>
-      <ol style="margin:10px 0 0;padding-left:20px;line-height:1.7">
-        <li>Telegramda <b>@BotFather</b> ga <code>/newbot</code> yozing va nom tanlang.</li>
-        <li>U bergan tokenni nusxalab, yuqoridagi <b>Bot token</b> maydoniga qoʻying.</li>
-        <li><code>/setdomain</code> → botni tanlang → sayt domeningizni yozing.</li>
-        <li>Bot username ni <b>Telegram bot username</b> maydoniga yozing.</li>
-        <li>Oʻz ID ingizni <b>@userinfobot</b> dan olib, <b>Telegram ID</b> ga yozing — yoki quyidagi tugma bilan bogʻlang.</li>
-      </ol>
-      <p style="margin:8px 0 0">Diqqat: Telegram tugmasi <b>haqiqiy domen</b>da ishlaydi; <code>localhost</code>da Telegram domenni qabul qilmaydi. Lokalda admin login va shaxsiy havola ishlayveradi.</p>
-    </details>
-
-    {% if tg_ready and tg_bot %}
-    <div class="actions" style="align-items:center;gap:14px;margin-top:4px">
-      <script async src="https://telegram.org/js/telegram-widget.js?22"
-        data-telegram-login="{{ tg_bot }}" data-size="medium" data-radius="18" data-userpic="false"
-        data-auth-url="{{ request.scheme }}://{{ request.get_host }}{% url 'telegram_bind' %}?state={{ tg_state }}"></script>
-      <span class="sub">Joriy Telegram akkauntni egasi sifatida bogʻlash.</span>
-    </div>
-    {% endif %}
-  </section>
-
-  <section class="card">
     <h2>Sevgilingiz uchun havola</h2>
-    <p class="sub">Bu havolani ochgan odam muzeyga <b>parolsiz</b> kiradi. Havolani faqat oshiqingizga yuboring — boshqa hech kim kira olmaydi.</p>
+    <p class="sub">Bu havolani ochgan odam muzeyni <b>parolsiz</b> koʻra oladi (faqat koʻrish, uni oʻzgartira olmaydi). Havolani faqat sevgilingizga yuboring. Havolaning muddati yoʻq: oʻzingiz yangilamaguningizcha ishlaydi.</p>
     {% if share_url %}
       <div class="field">
         <label>Shaxsiy havola</label>

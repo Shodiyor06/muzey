@@ -20,30 +20,32 @@ p{font-style:italic;margin:0 0 1.5rem;opacity:.82;line-height:1.6}
 .foot{margin-top:30px;font-size:.78rem;color:#b48f83}
 .foot a{color:#d9b9b0;text-decoration:none;border-bottom:1px solid rgba(217,185,176,.35);padding-bottom:1px}
 .foot a:hover{color:#fff;border-color:#fff}
+.btn{display:inline-block;background:#c19a55;color:#2a1220;font-weight:700;text-decoration:none;padding:.95rem 1.9rem;border-radius:999px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.btn:hover{background:#d2a85c}.btn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.steps{list-style:none;padding:0;margin:0 0 1.6rem;text-align:left;font-style:normal}
+.steps li{display:flex;gap:12px;align-items:flex-start;margin:0 0 .8rem;font-size:.92rem;color:#e9cfc8}
+.steps b.n{flex:none;width:26px;height:26px;border-radius:50%;background:rgba(210,168,92,.2);border:1px solid rgba(210,168,92,.5);color:#f0d9a0;display:grid;place-items:center;font-size:.8rem}
 .rule{width:54px;height:1px;background:rgba(210,168,92,.5);margin:0 auto 22px}
 </style></head><body>
 <div class="box">
   <div class="seal" aria-hidden="true"></div>
   <p class="kicker">Shaxsiy muzey</p>
-  <h1>{{ title }}</h1>
-  <p>Bu muzey faqat egasi va unga yuborilgan<br>shaxsiy havola egasi uchun ochiq.</p>
+  <h1>Muzeyga kirish</h1>
+  <p>Bu yerda parol yoki roʻyxatdan oʻtish shakli yoʻq.<br>Hamma Telegram bot orqali kiradi.</p>
   <div class="rule"></div>
 
-  {% if ready and bot and owner_ready %}
-    <div class="tg">
-      <script async src="https://telegram.org/js/telegram-widget.js?22"
-        data-telegram-login="{{ bot }}" data-size="large" data-radius="24"
-        data-userpic="false"
-        data-auth-url="{{ request.scheme }}://{{ request.get_host }}{% url 'telegram_enter' %}"></script>
-    </div>
-    <p style="font-size:.8rem;margin-bottom:0">Egasi boʻlsangiz, Telegram akkauntingiz bilan kiring.</p>
-  {% elif ready and bot %}
-    <div class="note">Egasi Telegram akkauntini hali bogʻlamagan. Admin panelda <b>Telegram ID</b> ni kiriting.</div>
-  {% else %}
-    <div class="note">Muzey egasi tomonidan yopilgan. Sizga shaxsiy havola yuborilgan boʻlsa, uni oching — parol soʻralmaydi.</div>
-  {% endif %}
+  <ol class="steps">
+    <li><b class="n">1</b><span>Telegram botni oching va <b>Start</b> ni bosing.</span></li>
+    <li><b class="n">2</b><span><b>“🖼 Muzey”</b> tugmasini bosing — bot sizni roʻyxatdan oʻtkazadi.</span></li>
+    <li><b class="n">3</b><span>Bot bergan <b>shaxsiy havolani</b> oching — toʻgʻri oʻz profilingizga tushasiz.</span></li>
+  </ol>
 
-  <p class="e">{{ err }}</p>
-  <p class="foot"><a href="{{ admin_url }}">Egasi: admin panelga kirish</a></p>
+  {% if bot %}
+    <a class="btn" href="{{ bot }}">Telegram botni ochish</a>
+  {% else %}
+    <div class="note">Telegram bot hali sozlanmagan (<b>TELEGRAM_BOT_USERNAME</b>).</div>
+  {% endif %}
+  <p style="font-size:.82rem;margin:1.4rem 0 0">Sevgilingiz havola yuborgan boʻlsa, oʻsha havolani oching — roʻyxatdan oʻtish shart emas.</p>
+  <p class="foot"><a href="{{ admin_url }}">Administrator</a></p>
 </div>
 </body></html>

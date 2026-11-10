@@ -1,0 +1,110 @@
+{% extends "panel/base.html" %}
+{% block title %}Bosh sahifa{% endblock %}
+{% block content %}
+<div class="row">
+  <section class="card hero">
+    <h1>Xush kelibsiz, {{ user.first_name|default:user.get_username }}</h1>
+    <p class="sub">“{{ dash.title }}” muzeyi boshqaruvi. Rasmlarni yuklang, xohlasangiz xaritani oʻzingiz chizing — muzey uzunligi rasmlar soniga oʻzi moslashadi.</p>
+    <div class="acts">
+      <a class="btn primary" href="{% url 'panel_upload' %}">+ Rasm yuklash</a>
+      <a class="btn ghost" href="{% url 'panel_map' %}">Xaritani chizish</a>
+      <a class="btn ghost" href="/" target="_blank" rel="noopener">Muzeyni koʻrish ↗</a>
+    </div>
+    <div class="link"><span>Havola:</span><code id="url">{{ dash.url }}</code>
+      <button class="btn ghost sm" id="cp" type="button">Nusxa olish</button>
+      {% if dash.share %}<span class="badge ok">Shaxsiy havola bilan</span>{% else %}<span class="badge ok">Faqat egasi uchun</span>{% endif %}
+    </div>
+  </section>
+
+  {% if dash.over %}
+  <div class="warn"><b>Diqqat:</b> chizilgan xaritada {{ dash.cap }} ta ramka bor, lekin {{ dash.photos }} ta rasm yuklangan. {{ dash.over }} ta rasm koʻrinmaydi. <a href="{% url 'panel_map' %}">Xaritani kattalashtiring</a> yoki avtomatik xaritaga qaytaring.</div>
+  {% endif %}
+
+  <div class="stats">
+    <div class="card stat"><small class="sub">Rasmlar</small><div class="n">{{ dash.photos }} <span>/ {{ dash.cap }} ramka</span></div><div class="bar"><i style="width:{{ dash.fill }}%"></i></div></div>
+    <div class="card stat"><small class="sub">Bugungi tashriflar</small><div class="n">{{ dash.today }}</div><div class="sub">7 kunda {{ dash.week }} · jami {{ dash.total }}</div></div>
+    <div class="card stat"><small class="sub">Yurakchalar</small><div class="n">♥ {{ dash.hearts }}</div><div class="sub">Rasmlarga bosilgan</div></div>
+    <div class="card stat"><small class="sub">Izohlar</small><div class="n">{{ dash.comments }}{% if dash.unseen %} <span class="badge no">{{ dash.unseen }} yangi</span>{% endif %}</div><div class="sub">Mehmonlar daftarida</div></div>
+  </div>
+
+  <div class="row two">
+    <section class="card">
+      <h2>Muzey xaritasi</h2>
+      <p class="sub">{{ dash.layout }} · taxminan {{ dash.meters }} m · {{ dash.cap }} ta ramka{% if dash.custom_map %} · qoʻlda chizilgan{% else %} · rasmlar soniga moslashgan{% endif %}</p>
+      <canvas id="mp" height="190" aria-label="Muzey xaritasi"></canvas>
+      <div class="actions"><a class="btn sm" href="{% url 'panel_map' %}">Xaritani tahrirlash</a></div>
+    </section>
+
+    <section class="card">
+      <h2>Tayyorlik · {{ dash.progress }}%</h2>
+      <p class="sub">Sovgʻa tayyor boʻlishi uchun shu qadamlar.</p>
+      <div class="bar" style="margin-top:0"><i style="width:{{ dash.progress }}%"></i></div>
+      <ul class="steps">
+        {% for s in dash.steps %}
+        <li class="{% if s.done %}done{% endif %}"><span class="t">{% if s.done %}✓{% else %}{{ forloop.counter }}{% endif %}</span>
+          <div><b>{{ s.label }}</b><small>{{ s.hint }}</small></div>
+          {% if not s.done %}<a href="{{ s.url }}">Bajarish</a>{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <div class="row two">
+    <section class="card">
+      <h2>Soʻnggi 7 kunlik tashriflar</h2>
+      <p class="sub">Siz oʻzingiz kirganingiz hisobga olinmaydi.</p>
+      <div class="chart">{% for c in dash.chart %}<div><b>{{ c.n }}</b><i style="height:{{ c.h }}%"></i><span>{{ c.label }}</span></div>{% endfor %}</div>
+    </section>
+
+    <section class="card">
+      <h2>Mehmonlar daftari</h2>
+      <p class="sub">Sevgilingiz qoldirgan yurakcha va izohlar.</p>
+      {% if dash.entries %}
+      <ul class="gl">
+        {% for e in dash.entries %}<li class="{% if e.new %}new{% endif %}"><div class="body"><p>{% if e.text %}{{ e.text }}{% else %}♥ Yurakcha{% endif %}</p><small>{% if e.photo %}“{{ e.photo }}” rasmiga · {% endif %}{{ e.age }} oldin</small></div></li>{% endfor %}
+      </ul>
+      <div class="actions"><a class="btn sm" href="{% url 'panel_guests' %}">Hammasini koʻrish</a></div>
+      {% else %}<p class="empty">Hali xabar yoʻq. Muzeyga kirib rasmni bosganda shu yerda chiqadi.</p>{% endif %}
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Soʻnggi yuklangan rasmlar</h2>
+    <p class="sub">Bosilsa, sana va hikoyani tahrirlash ochiladi.</p>
+    {% if dash.recent %}
+    <div class="ph-grid">
+      {% for p in dash.recent %}<figure><a class="im" href="{% url 'panel_photo' p.pk %}"><img src="{{ p.image.url }}" alt="" loading="lazy"></a><figcaption><b>{{ p|truncatechars:22 }}</b><span>{{ p.date|date:"d.m.Y"|default:"sana yoʻq" }}</span></figcaption></figure>{% endfor %}
+    </div>
+    {% else %}<p class="empty">Hali rasm yoʻq. “+ Rasm yuklash” tugmasini bosing.</p>{% endif %}
+  </section>
+</div>
+{{ dash.map|json_script:"mapjson" }}
+<script>
+(function(){
+  var cv=document.getElementById('mp');
+  if(cv){
+    var m=JSON.parse(document.getElementById('mapjson').textContent||'[]');
+    function draw(){
+      if(!m.length)return;
+      var dpr=Math.min(window.devicePixelRatio||1,2), w=cv.clientWidth||600, h=190;
+      cv.width=w*dpr; cv.height=h*dpr;
+      var g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+      g.fillStyle='#2a1220'; g.fillRect(0,0,w,h);
+      var mw=m[0].length, mh=m.length, s=Math.min((w-18)/mw,(h-18)/mh), ox=(w-mw*s)/2, oy=(h-mh*s)/2;
+      m.forEach(function(row,z){ [...row].forEach(function(c,x){
+        g.fillStyle = c==='#'?'#4a2a3a':(c==='S'?'#c19a55':(c==='L'?'#e2788f':(c==='V'?'#6f9bd8':'#f0cfc8')));
+        g.fillRect(ox+x*s+0.5, oy+z*s+0.5, Math.max(1,s-1), Math.max(1,s-1));
+      });});
+    }
+    draw(); window.addEventListener('resize',draw);
+  }
+  var cp=document.getElementById('cp');
+  if(cp){cp.onclick=function(){
+    var t=document.getElementById('url').textContent.trim(), b=this;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){
+      b.textContent='Nusxalandi ✓'; setTimeout(function(){b.textContent='Nusxa olish'},1800);
+    }).catch(function(){ window.prompt('Havolani nusxalang:', t); });
+  };}
+})();
+</script>
+{% endblock %}

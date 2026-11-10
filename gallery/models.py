@@ -1,5 +1,6 @@
 import os
 from io import BytesIO
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models
 from PIL import Image, ImageOps
@@ -9,16 +10,13 @@ class SiteSettings(models.Model):
     LAYOUTS = [("winding", "Burilishli yoʻlak"), ("cross", "Xoch zal"),
                ("ring", "Aylanma zal"), ("rooms", "Xonalar")]
     PALETTES = [("rose", "Atirgul"), ("night", "Tun"), ("gold", "Shampan"), ("green", "Zumrad")]
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,
+                                 related_name="museum", verbose_name="Egasi")
     title = models.CharField("Sarlavha", max_length=120, default="Bizning muzey")
     subtitle = models.TextField("Xat matni", default="Har bir surat — birga oʻtkazgan bir lahzamiz.")
     layout = models.CharField("Zal shakli", max_length=20, choices=LAYOUTS, default="winding",
                               help_text="Muzey rasmlar soniga qarab oʻzi uzayadi; shakl shu yerda tanlanadi.")
     palette = models.CharField("Devor rangi", max_length=20, choices=PALETTES, default="rose")
-    telegram_id = models.BigIntegerField("Telegram ID", null=True, blank=True,
-                                        help_text="Muzeyga faqat shu Telegram akkaunt egasi kira oladi. ID ni @userinfobot orqali bilib oling.")
-    telegram_bot = models.CharField("Telegram bot username", max_length=64, blank=True,
-                                    help_text="Masalan: mening_muzey_bot — @ belgisisiz.")
-    telegram_token = models.CharField("Telegram bot token", max_length=200, blank=True)
     share_token = models.CharField("Shaxsiy havola kaliti", max_length=64, blank=True, editable=False)
     music = models.FileField("Musiqa fayli (mp3)", upload_to="music/", blank=True, null=True,
                              help_text="Muzeyga kirganda sekin ijro etiladi. Mp3 tavsiya etiladi.")
@@ -41,19 +39,33 @@ class SiteSettings(models.Model):
         verbose_name = "Muzey sozlamalari"
         verbose_name_plural = "Muzey sozlamalari"
 
-    def save(self, *a, **kw):
-        self.pk = 1
-        super().save(*a, **kw)
-
     @classmethod
-    def load(cls):
-        return cls.objects.get_or_create(pk=1)[0]
+    def for_user(cls, user):
+        """Foydalanuvchining oʻz muzeyi (yoʻq boʻlsa yaratiladi).
+
+        Egasiz qolgan eski muzey (koʻp foydalanuvchili tizimgacha yaratilgan) birinchi
+        staff foydalanuvchiga biriktiriladi.
+        """
+        s = cls.objects.filter(owner=user).first()
+        if s:
+            return s
+        if user.is_staff:
+            legacy = cls.objects.filter(owner__isnull=True).first()
+            if legacy:
+                legacy.owner = user
+                legacy.save(update_fields=["owner"])
+                for m in (Photo, GuestEntry, DailyVisit):
+                    m.objects.filter(owner__isnull=True).update(owner=user)
+                return legacy
+        return cls.objects.create(owner=user)
 
     def __str__(self):
         return self.title
 
 
 class Photo(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,
+                              related_name="photos", verbose_name="Egasi")
     title = models.CharField("Izoh", max_length=120, blank=True)
     image = models.ImageField("Rasm", upload_to="photos/")
     order = models.PositiveIntegerField("Tartib", default=0, help_text="Kichik raqam — avval koʻrinadi.")
@@ -82,16 +94,21 @@ class Photo(models.Model):
 
 
 class DailyVisit(models.Model):
-    date = models.DateField(unique=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,
+                              related_name="visits")
+    date = models.DateField()
     count = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ["-date"]
+        unique_together = [("owner", "date")]
         verbose_name = "Kunlik tashrif"
         verbose_name_plural = "Kunlik tashriflar"
 
 
 class GuestEntry(models.Model):
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE,
+                              related_name="guest_entries")
     photo = models.ForeignKey(Photo, null=True, blank=True, on_delete=models.SET_NULL)
     text = models.CharField("Xabar", max_length=300, blank=True)
     is_heart = models.BooleanField("Yurakcha", default=False)
