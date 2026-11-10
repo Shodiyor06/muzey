@@ -5,6 +5,7 @@ from gallery.views import (config, guest, index, media, share_entry, sudo_enter,
                            telegram_admin, telegram_enter)
 
 urlpatterns = [
+    path("", include("access.urls")),
     path("admin/", include("gallery.panel_urls")),
     path("admin/django/", admin.site.urls),
     path("api/config/", config),
