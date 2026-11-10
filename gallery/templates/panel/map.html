@@ -16,6 +16,8 @@
       <button class="btn sm on" data-tool="wall" type="button">🧱 Devor</button>
       <button class="btn sm" data-tool="floor" type="button">◻ Pol</button>
       <button class="btn sm" data-tool="start" type="button">🚪 Kirish</button>
+      <button class="btn sm" data-tool="letter" type="button">💌 Xat</button>
+      <button class="btn sm" data-tool="video" type="button">🎬 Video</button>
       <button class="btn sm" type="button" id="clear">Tozalash</button>
     </div>
 
@@ -33,6 +35,8 @@
       <span><i class="dot" style="background:#3d2333"></i>devor</span>
       <span><i class="dot" style="background:#f0cfc8"></i>pol</span>
       <span><i class="dot" style="background:#c19a55"></i>kirish</span>
+      <span><i class="dot" style="background:#e2788f"></i>xat (L)</span>
+      <span><i class="dot" style="background:#6f9bd8"></i>video (V)</span>
       <span>Rasm ramkalari: <b id="cap">0</b></span>
     </div>
     <p id="mapmsg" class="sub"></p>
@@ -55,7 +59,8 @@
     <ul class="steps" style="margin-top:14px">
       <li><span class="t">1</span><div><b>Polni boʻyang</b><small>Pingvin yuradigan yoʻlaklar.</small></div></li>
       <li><span class="t">2</span><div><b>Kirish nuqtasini qoʻying</b><small>Bitta katak S boʻladi.</small></div></li>
-      <li><span class="t">3</span><div><b>Saqlang</b><small>Muzey shu xarita boʻyicha quriladi.</small></div></li>
+      <li><span class="t">3</span><div><b>Xat va videoni joylang (ixtiyoriy)</b><small>💌 va 🎬 bilan katakni belgilang — lavha shu katakning devoriga osiladi. Belgilamasangiz, ular Sozlamalardagi raqamga yoki eng oxiriga qoʻyiladi.</small></div></li>
+      <li><span class="t">4</span><div><b>Saqlang</b><small>Muzey shu xarita boʻyicha quriladi.</small></div></li>
     </ul>
     <p class="sub" style="margin-top:14px">Hozirgi xarita: <b>{{ cap }} ta ramka</b>, {{ photos }} ta rasm yuklangan.{% if custom %} Xarita qoʻlda chizilgan.{% else %} Xarita rasmlar soniga moslashgan.{% endif %}</p>
     {% if custom and cap < photos %}
@@ -81,12 +86,16 @@
     grid=[];
     for(var z=0;z<rows;z++){
       var line=cur[z]||'', row=[];
-      for(var x=0;x<cols;x++) row.push(line[x]==='.'||line[x]==='S'?line[x]:'#');
+      for(var x=0;x<cols;x++) row.push('.SLV'.indexOf(line[x])>=0&&line[x]?line[x]:'#');
       grid.push(row);
     }
   }
   function findStart(){
     for(var z=0;z<rows;z++)for(var x=0;x<cols;x++)if(grid[z][x]==='S')return [x,z];
+    return null;
+  }
+  function findMark(ch){
+    for(var z=0;z<rows;z++)for(var x=0;x<cols;x++)if(grid[z][x]===ch)return [x,z];
     return null;
   }
   function analyze(){
@@ -114,8 +123,9 @@
     g.clearRect(0,0,cv.width,cv.height);
     for(var z=0;z<rows;z++)for(var x=0;x<cols;x++){
       var c=grid[z][x];
-      g.fillStyle = c==='#'?'#3d2333':(c==='S'?'#c19a55':'#f0cfc8');
+      g.fillStyle = c==='#'?'#3d2333':(c==='S'?'#c19a55':(c==='L'?'#e2788f':(c==='V'?'#6f9bd8':'#f0cfc8')));
       g.fillRect(x*CS,z*CS,CS-1,CS-1);
+      if(c==='L'||c==='V'){g.fillStyle='#fff';g.font='bold '+Math.round(CS*.6)+'px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(c,x*CS+CS/2,z*CS+CS/2);}
       if(c==='S'){g.beginPath();g.arc(x*CS+CS/2,z*CS+CS/2,CS*.22,0,7);g.fillStyle='#4a1d36';g.fill();}
     }
     analyze();
@@ -126,9 +136,11 @@
     return (x>=0&&z>=0&&x<cols&&z<rows)?[x,z]:null;
   }
   function paint(x,z){
-    if(tool==='start'){
-      var old=findStart(); if(old) grid[old[1]][old[0]]='.';
-      grid[z][x]='S';
+    if(tool==='start'||tool==='letter'||tool==='video'){
+      var ch = tool==='start'?'S':(tool==='letter'?'L':'V');
+      if(grid[z][x]==='S'&&ch!=='S')return;
+      var old=findMark(ch); if(old) grid[old[1]][old[0]]='.';
+      grid[z][x]=ch;
     }else{
       if(grid[z][x]==='S')return;
       grid[z][x]= tool==='wall'?'#':'.';
@@ -137,12 +149,12 @@
   }
   cv.addEventListener('pointerdown',function(e){
     var c=cellAt(e); if(!c)return; painting=true; cv.setPointerCapture(e.pointerId);
-    if(tool==='start'){paint(c[0],c[1]);painting=false;}else paint(c[0],c[1]);
+    if(tool==='start'||tool==='letter'||tool==='video'){paint(c[0],c[1]);painting=false;}else paint(c[0],c[1]);
     e.preventDefault();
   });
   cv.addEventListener('pointermove',function(e){
     if(!painting)return; var c=cellAt(e); if(!c)return;
-    if(tool==='start'){paint(c[0],c[1]);painting=false;}else paint(c[0],c[1]);
+    if(tool==='start'||tool==='letter'||tool==='video'){paint(c[0],c[1]);painting=false;}else paint(c[0],c[1]);
   });
   ['pointerup','pointercancel','pointerleave'].forEach(function(t){cv.addEventListener(t,function(){painting=false;});});
 

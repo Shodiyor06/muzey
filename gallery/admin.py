@@ -29,7 +29,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         ("3. Kirish", {"fields": ("telegram_bot", "telegram_id"),
                        "description": "Muzeyga faqat shu Telegram akkaunt egasi kira oladi. Bot tokeni va havola asosiy panelda boshqariladi."}),
         ("4. Fon musiqasi", {"fields": ("music",)}),
-        ("5. Soʻnggi xona (xat va video)", {"fields": ("letter_title", "letter_text", "together_since", "video"),
+        ("5. Soʻnggi xona (xat va video)", {"fields": ("letter_title", "letter_text", "together_since", "video", "letter_pos", "video_pos"),
                                            "description": "Xat va video oxirgi xonada chiqadi. Video xat yonidagi kichik ekranda jiringlaydi."}),
     ]
 

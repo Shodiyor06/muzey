@@ -62,6 +62,7 @@ class SettingsForm(forms.ModelForm):
         model = SiteSettings
         fields = ("title", "subtitle", "layout", "palette", "music",
                   "letter_title", "letter_text", "together_since", "video",
+                  "letter_pos", "video_pos",
                   "telegram_bot", "telegram_id")
         widgets = {"telegram_id": forms.NumberInput(attrs={"placeholder": "masalan 123456789"})}
 

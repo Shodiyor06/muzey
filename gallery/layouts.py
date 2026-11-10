@@ -1,6 +1,7 @@
 """Muzey xaritalari.
 
-Xarita — satrlar roʻyxati. ``#`` devor, ``.`` pol, ``S`` boshlanish nuqtasi.
+Xarita — satrlar roʻyxati. ``#`` devor, ``.`` pol, ``S`` boshlanish nuqtasi,
+``L`` — xat lavhasi turadigan katak, ``V`` — video turadigan katak (ikkalasi ham pol hisoblanadi).
 4 ta tayyor shakl bor, lekin muzey rasmlar soniga qarab oʻzi uzayadi.
 Qoʻlda chizilgan xarita (SiteSettings.map_data) boʻlsa, oʻsha ishlatiladi.
 """
@@ -28,7 +29,7 @@ def parse(text):
     if width < 3:
         return None
     rows = [r.ljust(width, "#") for r in rows]
-    bad = set("".join(rows)) - set("#.S")
+    bad = set("".join(rows)) - set("#.SLV")
     if bad or not any("S" in r for r in rows):
         return None
     if not reachable(rows):

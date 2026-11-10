@@ -116,7 +116,9 @@ def config(request):
         "video": s.video.url if s.video else "",
         "map": m, "slots": len(slots(m)),
         "letter": {"title": s.letter_title, "text": s.letter_text,
-                   "since": s.together_since.isoformat() if s.together_since else ""},
+                   "since": s.together_since.isoformat() if s.together_since else "",
+                   "pos": s.letter_pos},
+        "video_pos": s.video_pos,
         "photos": [{"id": p.id, "src": p.image.url, "title": p.title, "story": p.story,
                     "date": p.date.isoformat() if p.date else "", "hearts": p.h} for p in photos],
     })

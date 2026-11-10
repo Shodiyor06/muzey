@@ -121,6 +121,10 @@
     <div class="field">
       <label for="{{ form.video.id_for_label }}">{{ form.video.label }}</label>{{ form.video }}{{ form.video.errors }}
       <span class="helptext">Qisqa mp4 tavsiya etiladi (masalan 10–30 soniya). {% if museum.video %}Joriy video: <a href="{{ museum.video.url }}" target="_blank" rel="noopener">{{ museum.video.name }}</a>{% endif %}</span>
+      <label for="{{ form.letter_pos.id_for_label }}">{{ form.letter_pos.label }}</label>{{ form.letter_pos }}{{ form.letter_pos.errors }}
+      <span class="helptext">{{ form.letter_pos.help_text }}</span>
+      <label for="{{ form.video_pos.id_for_label }}">{{ form.video_pos.label }}</label>{{ form.video_pos }}{{ form.video_pos.errors }}
+      <span class="helptext">{{ form.video_pos.help_text }}</span>
     </div>
   </section>
 

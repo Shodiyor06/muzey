@@ -29,6 +29,12 @@ class SiteSettings(models.Model):
                                       help_text="Lavhada “Biz birga ... kun” deb hisoblab turadi.")
     video = models.FileField("Xat oldidagi video", upload_to="video/", blank=True, null=True,
                              help_text="Oxirgi xonada, xat yonida kichik ekranda jiringlaydi. Qisqa mp4 tavsiya etiladi.")
+    letter_pos = models.PositiveIntegerField(
+        "Xat lavhasi oʻrni", default=0,
+        help_text="Xat lavhasi nechanchi devor ramkasi oʻrnida turadi (boshidan sanaladi). 0 — eng oxirida. Xaritada L belgisi qoʻyilgan boʻlsa, oʻsha ustun.")
+    video_pos = models.PositiveIntegerField(
+        "Video oʻrni", default=0,
+        help_text="Video nechanchi devor ramkasi oʻrnida turadi. 0 — xatdan oldingi joyda. Xaritada V belgisi qoʻyilgan boʻlsa, oʻsha ustun.")
     map_data = models.TextField("Qoʻlda chizilgan xarita", blank=True, editable=False)
 
     class Meta:

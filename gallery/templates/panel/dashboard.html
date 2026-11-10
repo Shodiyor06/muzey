@@ -92,7 +92,7 @@
       g.fillStyle='#2a1220'; g.fillRect(0,0,w,h);
       var mw=m[0].length, mh=m.length, s=Math.min((w-18)/mw,(h-18)/mh), ox=(w-mw*s)/2, oy=(h-mh*s)/2;
       m.forEach(function(row,z){ [...row].forEach(function(c,x){
-        g.fillStyle = c==='#'?'#4a2a3a':(c==='S'?'#c19a55':'#f0cfc8');
+        g.fillStyle = c==='#'?'#4a2a3a':(c==='S'?'#c19a55':(c==='L'?'#e2788f':(c==='V'?'#6f9bd8':'#f0cfc8')));
         g.fillRect(ox+x*s+0.5, oy+z*s+0.5, Math.max(1,s-1), Math.max(1,s-1));
       });});
     }
