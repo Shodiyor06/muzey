@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR))
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 DEBUG = os.environ.get("DEBUG", "1") == "1"
@@ -56,8 +56,7 @@ TEMPLATES = [{
 WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": dj_database_url.config(
-        conn_max_age=600,
-        ssl_require=True,
+        default=f"sqlite:///{DATA_DIR / 'db.sqlite3'}", conn_max_age=600
     )
 }
 LANGUAGE_CODE = "uz"
@@ -67,7 +66,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = DATA_DIR / "media"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
