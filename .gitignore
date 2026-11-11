@@ -14,4 +14,4 @@ staticfiles/
 .coverage
 htmlcov/
 
-.DS_Store
+.DS_Storemedia/
